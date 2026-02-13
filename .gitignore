@@ -1,0 +1,33 @@
+# Environment files
+.env.development
+.env.production
+.env.test
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build files
+*.exe
+*.dll
+*.so
+*.dylib
+school-backend
+
+# Test files
+*.test
+*.out
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/
