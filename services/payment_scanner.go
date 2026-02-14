@@ -17,18 +17,18 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const PaymentScannerCollection = "payment_scanners"
+const PaymentDeviceCollection = "payment_scanner_devices"
 
 //
 // ================= SERVICE INTERFACE =================
 //
 
 type PaymentScannerService interface {
-	Create(ctx context.Context, companyCode string, req *requests.CreatePaymentScannerRequest) (*models.PaymentScanner, error)
-	GetAll(ctx context.Context, companyCode string) ([]*models.PaymentScanner, error)
-	GetByID(ctx context.Context, companyCode string, id string) (*models.PaymentScanner, error)
-	GetByUUIDs(ctx context.Context, companyCode string, ids []string) ([]*models.PaymentScanner, error)
-	Update(ctx context.Context, companyCode string, id string, req *requests.UpdatePaymentScannerRequest) (*models.PaymentScanner, error)
+	Create(ctx context.Context, companyCode string, req *requests.CreatePaymentScannerRequest) (*models.PaymentDevice, error)
+	GetAll(ctx context.Context, companyCode string) ([]*models.PaymentDevice, error)
+	GetByID(ctx context.Context, companyCode string, id string) (*models.PaymentDevice, error)
+	GetByUUIDs(ctx context.Context, companyCode string, ids []string) ([]*models.PaymentDevice, error)
+	Update(ctx context.Context, companyCode string, id string, req *requests.UpdatePaymentScannerRequest) (*models.PaymentDevice, error)
 	Delete(ctx context.Context, companyCode string, id string) error
 }
 
@@ -50,22 +50,24 @@ func (s *paymentScannerService) Create(
 	ctx context.Context,
 	companyCode string,
 	req *requests.CreatePaymentScannerRequest,
-) (*models.PaymentScanner, error) {
+) (*models.PaymentDevice, error) {
 
 	db := mdb.GetMongo()
 	collection := db.GetClient().
 		Database(fmt.Sprintf("company_%s", companyCode)).
-		Collection(PaymentScannerCollection)
+		Collection(PaymentDeviceCollection)
 
-	paymentScanner := models.NewPaymentScanner()
-	paymentScanner.Bind(req)
+	device := models.NewPaymentDevice()
+	device.MachineNo = req.MachineNo
+	device.Tid = req.Tid
+	device.IsActive = req.IsActive
 
-	_, err := collection.InsertOne(ctx, paymentScanner)
+	_, err := collection.InsertOne(ctx, device)
 	if err != nil {
 		return nil, err
 	}
 
-	return paymentScanner, nil
+	return device, nil
 }
 
 //
@@ -75,12 +77,12 @@ func (s *paymentScannerService) Create(
 func (s *paymentScannerService) GetAll(
 	ctx context.Context,
 	companyCode string,
-) ([]*models.PaymentScanner, error) {
+) ([]*models.PaymentDevice, error) {
 
 	db := mdb.GetMongo()
 	collection := db.GetClient().
 		Database(fmt.Sprintf("company_%s", companyCode)).
-		Collection(PaymentScannerCollection)
+		Collection(PaymentDeviceCollection)
 
 	cursor, err := collection.Find(ctx, bson.M{"is_deleted": false})
 	if err != nil {
@@ -88,12 +90,12 @@ func (s *paymentScannerService) GetAll(
 	}
 	defer cursor.Close(ctx)
 
-	var paymentScanners []*models.PaymentScanner
-	if err := cursor.All(ctx, &paymentScanners); err != nil {
+	var devices []*models.PaymentDevice
+	if err := cursor.All(ctx, &devices); err != nil {
 		return nil, err
 	}
 
-	return paymentScanners, nil
+	return devices, nil
 }
 
 //
@@ -104,28 +106,28 @@ func (s *paymentScannerService) GetByID(
 	ctx context.Context,
 	companyCode string,
 	id string,
-) (*models.PaymentScanner, error) {
+) (*models.PaymentDevice, error) {
 
 	db := mdb.GetMongo()
 	collection := db.GetClient().
 		Database(fmt.Sprintf("company_%s", companyCode)).
-		Collection(PaymentScannerCollection)
+		Collection(PaymentDeviceCollection)
 
 	filter := bson.M{"entity_id": id, "is_deleted": false}
 	if oid, err := primitive.ObjectIDFromHex(id); err == nil {
 		filter = bson.M{"_id": oid, "is_deleted": false}
 	}
 
-	var paymentScanner models.PaymentScanner
-	err := collection.FindOne(ctx, filter).Decode(&paymentScanner)
+	var device models.PaymentDevice
+	err := collection.FindOne(ctx, filter).Decode(&device)
 	if err == mongo.ErrNoDocuments {
-		return nil, errors.New("payment scanner not found")
+		return nil, errors.New("payment device not found")
 	}
 	if err != nil {
 		return nil, err
 	}
 
-	return &paymentScanner, nil
+	return &device, nil
 }
 
 //
@@ -136,12 +138,12 @@ func (s *paymentScannerService) GetByUUIDs(
 	ctx context.Context,
 	companyCode string,
 	ids []string,
-) ([]*models.PaymentScanner, error) {
+) ([]*models.PaymentDevice, error) {
 
 	db := mdb.GetMongo()
 	collection := db.GetClient().
 		Database(fmt.Sprintf("company_%s", companyCode)).
-		Collection(PaymentScannerCollection)
+		Collection(PaymentDeviceCollection)
 
 	cursor, err := collection.Find(ctx, bson.M{
 		"entity_id":  bson.M{"$in": ids},
@@ -152,12 +154,12 @@ func (s *paymentScannerService) GetByUUIDs(
 	}
 	defer cursor.Close(ctx)
 
-	var paymentScanners []*models.PaymentScanner
-	if err := cursor.All(ctx, &paymentScanners); err != nil {
+	var devices []*models.PaymentDevice
+	if err := cursor.All(ctx, &devices); err != nil {
 		return nil, err
 	}
 
-	return paymentScanners, nil
+	return devices, nil
 }
 
 //
@@ -169,38 +171,23 @@ func (s *paymentScannerService) Update(
 	companyCode string,
 	id string,
 	req *requests.UpdatePaymentScannerRequest,
-) (*models.PaymentScanner, error) {
+) (*models.PaymentDevice, error) {
 
 	db := mdb.GetMongo()
 	collection := db.GetClient().
 		Database(fmt.Sprintf("company_%s", companyCode)).
-		Collection(PaymentScannerCollection)
+		Collection(PaymentDeviceCollection)
 
 	updateFields := bson.M{}
 
-	if req.StudentEntityID != nil {
-		updateFields["student_entity_id"] = *req.StudentEntityID
+	if req.MachineNo != nil {
+		updateFields["machine_no"] = *req.MachineNo
 	}
-	if req.ExamEntityID != nil {
-		updateFields["exam_entity_id"] = *req.ExamEntityID
+	if req.Tid != nil {
+		updateFields["tid"] = *req.Tid
 	}
-	if req.PaymentID != nil {
-		updateFields["payment_id"] = *req.PaymentID
-	}
-	if req.PaymentDate != nil {
-		updateFields["payment_date"] = *req.PaymentDate
-	}
-	if req.PaymentMethod != nil {
-		updateFields["payment_method"] = *req.PaymentMethod
-	}
-	if req.Amount != nil {
-		updateFields["amount"] = *req.Amount
-	}
-	if req.Status != nil {
-		updateFields["status"] = *req.Status
-	}
-	if req.TransactionID != nil {
-		updateFields["transaction_id"] = *req.TransactionID
+	if req.IsActive != nil {
+		updateFields["is_active"] = *req.IsActive
 	}
 	if req.IsDeleted != nil {
 		updateFields["is_deleted"] = *req.IsDeleted
@@ -219,13 +206,13 @@ func (s *paymentScannerService) Update(
 		filter = bson.M{"_id": oid, "is_deleted": false}
 	}
 
-	var updated models.PaymentScanner
+	var updated models.PaymentDevice
 	err := collection.
 		FindOneAndUpdate(ctx, filter, bson.M{"$set": updateFields}, opts).
 		Decode(&updated)
 
 	if err == mongo.ErrNoDocuments {
-		return nil, errors.New("payment scanner not found")
+		return nil, errors.New("payment device not found")
 	}
 	if err != nil {
 		return nil, err
@@ -235,7 +222,7 @@ func (s *paymentScannerService) Update(
 }
 
 //
-// ================= DELETE (SOFT DELETE) =================
+// ================= DELETE =================
 //
 
 func (s *paymentScannerService) Delete(
@@ -247,7 +234,7 @@ func (s *paymentScannerService) Delete(
 	db := mdb.GetMongo()
 	collection := db.GetClient().
 		Database(fmt.Sprintf("company_%s", companyCode)).
-		Collection(PaymentScannerCollection)
+		Collection(PaymentDeviceCollection)
 
 	filter := bson.M{"entity_id": id, "is_deleted": false}
 	if oid, err := primitive.ObjectIDFromHex(id); err == nil {
@@ -265,7 +252,7 @@ func (s *paymentScannerService) Delete(
 	}
 
 	if result.MatchedCount == 0 {
-		return errors.New("payment scanner not found")
+		return errors.New("payment device not found")
 	}
 
 	return nil

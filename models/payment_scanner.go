@@ -69,14 +69,9 @@ func NewUpdatePaymentScanner() *UpdatePaymentScanner {
 //
 
 func (p *PaymentScanner) Bind(req *requests.CreatePaymentScannerRequest) {
-	p.StudentEntityID = req.StudentEntityID
-	p.ExamEntityID = req.ExamEntityID
-	p.PaymentID = req.PaymentID
-	p.PaymentDate = req.PaymentDate
-	p.PaymentMethod = req.PaymentMethod
-	p.Amount = req.Amount
-	p.Status = req.Status
-	p.TransactionID = req.TransactionID
+	// Note: This binding is for legacy reasons or if we still use the scanner endpoints for transactions
+	// But in the new design, the /payment-scanners endpoints handle devices.
+	// We'll keep this aligned with the Transaction fields for now if needed.
 }
 
 //
@@ -84,31 +79,4 @@ func (p *PaymentScanner) Bind(req *requests.CreatePaymentScannerRequest) {
 //
 
 func (p *UpdatePaymentScanner) Bind(req *requests.UpdatePaymentScannerRequest) {
-	if req.StudentEntityID != nil {
-		p.StudentEntityID = req.StudentEntityID
-	}
-	if req.ExamEntityID != nil {
-		p.ExamEntityID = req.ExamEntityID
-	}
-	if req.PaymentID != nil {
-		p.PaymentID = req.PaymentID
-	}
-	if req.PaymentDate != nil {
-		p.PaymentDate = req.PaymentDate
-	}
-	if req.PaymentMethod != nil {
-		p.PaymentMethod = req.PaymentMethod
-	}
-	if req.Amount != nil {
-		p.Amount = req.Amount
-	}
-	if req.Status != nil {
-		p.Status = req.Status
-	}
-	if req.TransactionID != nil {
-		p.TransactionID = req.TransactionID
-	}
-	if req.IsDeleted != nil {
-		p.IsDeleted = req.IsDeleted
-	}
 }

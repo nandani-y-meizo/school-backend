@@ -2,44 +2,29 @@ package requests
 
 import (
 	"shared/pkgs/validations"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 type CreatePaymentScannerRequest struct {
-	StudentEntityID string    `json:"student_entity_id" binding:"required"`
-	ExamEntityID    string    `json:"exam_entity_id" binding:"required"`
-	PaymentID       string    `json:"payment_id" binding:"required"`
-	PaymentDate     time.Time `json:"payment_date" binding:"required"`
-	PaymentMethod   string    `json:"payment_method" binding:"required"`
-	Amount          float64   `json:"amount" binding:"required"`
-	Status          string    `json:"status" binding:"required"`
-	TransactionID   string    `json:"transaction_id" binding:"required"`
+	MachineNo string `json:"machine_no" binding:"required"`
+	Tid       string `json:"tid" binding:"required"`
+	IsActive  bool   `json:"is_active"`
 }
 
 type UpdatePaymentScannerRequest struct {
-	StudentEntityID *string    `json:"student_entity_id,omitempty"`
-	ExamEntityID    *string    `json:"exam_entity_id,omitempty"`
-	PaymentID       *string    `json:"payment_id,omitempty"`
-	PaymentDate     *time.Time `json:"payment_date,omitempty"`
-	PaymentMethod   *string    `json:"payment_method,omitempty"`
-	Amount          *float64   `json:"amount,omitempty"`
-	Status          *string    `json:"status,omitempty"`
-	TransactionID   *string    `json:"transaction_id,omitempty"`
-	IsDeleted       *bool      `json:"is_deleted,omitempty"`
+	MachineNo *string `json:"machine_no,omitempty"`
+	Tid       *string `json:"tid,omitempty"`
+	IsActive  *bool   `json:"is_active,omitempty"`
+	IsDeleted *bool   `json:"is_deleted,omitempty"`
 }
 
 type UpdatePaymentScannerResponse struct {
-	StudentEntityID string    `json:"student_entity_id"`
-	ExamEntityID    string    `json:"exam_entity_id"`
-	PaymentID       string    `json:"payment_id"`
-	PaymentDate     time.Time `json:"payment_date"`
-	PaymentMethod   string    `json:"payment_method"`
-	Amount          float64   `json:"amount"`
-	Status          string    `json:"status"`
-	TransactionID   string    `json:"transaction_id"`
-	IsDeleted       bool      `json:"is_deleted"`
+	EntityID  string `json:"entity_id"`
+	MachineNo string `json:"machine_no"`
+	Tid       string `json:"tid"`
+	IsActive  bool   `json:"is_active"`
+	IsDeleted bool   `json:"is_deleted"`
 }
 
 //
