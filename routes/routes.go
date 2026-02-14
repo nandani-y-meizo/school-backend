@@ -60,6 +60,14 @@ func Routes(api *gin.RouterGroup) {
 
 		// Additional student routes
 		students.POST("/batch", GetStudentsByUUIDs)
+		students.POST("/import", ImportStudents)
+	}
+
+	importRoutes := api.Group("/companies/:company_code/import")
+	{
+		importRoutes.POST("/books", ImportBooks)
+		importRoutes.POST("/exams", ImportExams)
+		importRoutes.POST("/students", ImportStudents)
 	}
 
 	users := api.Group("/companies/:company_code/users")
@@ -89,10 +97,21 @@ func Routes(api *gin.RouterGroup) {
 	receipts := api.Group("/companies/:company_code/receipts")
 	{
 		receipts.POST("/lookup", GetReceiptByRefNo)
+		receipts.POST("/confirm", ConfirmPayment)
 	}
 
 	unpaidStudents := api.Group("/companies/:company_code/unpaid-students")
 	{
 		unpaidStudents.POST("", GetUnpaidStudents)
+	}
+
+	dailyReports := api.Group("/companies/:company_code/daily-reports")
+	{
+		dailyReports.POST("", GetDailyReports)
+	}
+
+	dashboard := api.Group("/companies/:company_code/dashboard")
+	{
+		dashboard.GET("/stats", GetDashboardStats)
 	}
 }

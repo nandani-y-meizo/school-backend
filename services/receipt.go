@@ -84,7 +84,7 @@ func (s *receiptService) GetReceiptByRefNo(
 		Collection("exams")
 
 	// Build payment history with exam details
-	var paymentHistory []models.PaymentHistoryItem
+	paymentHistory := make([]models.PaymentHistoryItem, 0)
 	var totalPaid float64
 	examMap := make(map[string]models.Exam)
 
@@ -124,9 +124,10 @@ func (s *receiptService) GetReceiptByRefNo(
 		}
 	}
 
-	// Get all exams for this student's class to determine pending payments
+	// Get all exams for this student's class and board to determine pending payments
 	examCursor, err := examCollection.Find(ctx, bson.M{
 		"class_entity_id": student.ClassEntityID,
+		"board_entity_id": student.BoardEntityID,
 		"is_deleted":      false,
 	})
 	if err != nil {
@@ -139,30 +140,162 @@ func (s *receiptService) GetReceiptByRefNo(
 		return nil, err
 	}
 
-	// Build pending payments
+	// Get book collection
+	bookCollection := db.GetClient().
+		Database(fmt.Sprintf("company_%s", companyCode)).
+		Collection("books")
+
+	// Get all books for this student's class and board
+	bookCursor, err := bookCollection.Find(ctx, bson.M{
+		"class_entity_id": student.ClassEntityID,
+		"board_entity_id": student.BoardEntityID,
+		"is_deleted":      false,
+	})
+	if err != nil {
+		return nil, err
+	}
+	defer bookCursor.Close(ctx)
+
+	var allBooks []models.Book
+	if err := bookCursor.All(ctx, &allBooks); err != nil {
+		return nil, err
+	}
+
+	// Build pending payments and available exams
 	var pendingPayments []models.PendingPayment
+	var availableExams models.AvailableExams
+
+	// Initialize slices to ensure empty array in JSON instead of null
+	availableExams.Compulsory = make([]models.Exam, 0)
+	availableExams.Optional = make([]models.Exam, 0)
+
 	var totalDue float64
 	paidExamMap := make(map[string]bool)
+	paidBookMap := make(map[string]bool)
 
-	// Mark exams that have been paid
-	for _, payment := range paymentScanners {
+	// Get all payment scanners for this student to check actual payment status
+	paymentCursor, err := paymentCollection.Find(ctx, bson.M{
+		"student_entity_id": student.EntityID,
+		"is_deleted":        false,
+	})
+	if err != nil {
+		return nil, err
+	}
+	defer paymentCursor.Close(ctx)
+
+	var paymentScannersForStatus []models.PaymentScanner
+	if err := paymentCursor.All(ctx, &paymentScannersForStatus); err != nil {
+		return nil, err
+	}
+
+	for _, payment := range paymentScannersForStatus {
 		if payment.Status == "paid" {
 			paidExamMap[payment.ExamEntityID] = true
+			paidBookMap[payment.ExamEntityID] = true
+			fmt.Printf("Found paid payment for entity_id: %s\n", payment.ExamEntityID)
 		}
 	}
 
-	// Find unpaid exams
+	// Process exams
 	for _, exam := range allExams {
-		if !paidExamMap[exam.EntityID] {
+		// Handle both old fees_paid (boolean) and new fees_type (string) fields
+		isCompulsory := false
+		if exam.FeesType != "" {
+			// New format: use fees_type string
+			isCompulsory = exam.FeesType == "compulsory"
+		} else {
+			// Old format: use fees_paid boolean
+			isCompulsory = exam.FeesPaid
+		}
+
+		// Check if this exam is actually paid
+		isPaid := paidExamMap[exam.EntityID]
+
+		// Update the exam's fees_paid status to reflect actual payment status
+		exam.FeesPaid = isPaid
+
+		fmt.Printf("Exam %s (%s): isPaid=%t, original fees_paid=%t, new fees_paid=%t\n",
+			exam.ExamName, exam.EntityID, isPaid, exam.FeesPaid, exam.FeesPaid)
+
+		// Categorize for available exams
+		if isCompulsory {
+			availableExams.Compulsory = append(availableExams.Compulsory, exam)
+		} else {
+			availableExams.Optional = append(availableExams.Optional, exam)
+		}
+
+		// Calculate pending payments (unpaid exams)
+		if !isPaid {
 			pendingPayments = append(pendingPayments, models.PendingPayment{
 				ExamEntityID: exam.EntityID,
 				ExamName:     exam.ExamName,
 				ExamAmount:   exam.ExamAmount,
-				FeesPaid:     exam.FeesPaid,
+				FeesPaid:     isPaid,
 				DueAmount:    exam.ExamAmount,
 			})
 			totalDue += exam.ExamAmount
 		}
+	}
+
+	// Process books
+	var availableBooks models.AvailableBooks
+	availableBooks.Compulsory = make([]models.Book, 0)
+	availableBooks.Optional = make([]models.Book, 0)
+
+	for _, book := range allBooks {
+		// Handle both old fees_paid (boolean) and new fees_type (string) fields
+		isCompulsory := false
+		if book.FeesType != "" {
+			// New format: use fees_type string
+			isCompulsory = book.FeesType == "compulsory"
+		} else {
+			// Old format: use fees_paid boolean
+			isCompulsory = book.FeesPaid
+		}
+
+		// Check if this book is actually paid
+		isPaid := paidBookMap[book.EntityID]
+
+		// Update the book's fees_paid status to reflect actual payment status
+		book.FeesPaid = isPaid
+
+		if isCompulsory {
+			availableBooks.Compulsory = append(availableBooks.Compulsory, book)
+		} else {
+			availableBooks.Optional = append(availableBooks.Optional, book)
+		}
+	}
+
+	// Get board collection for board name
+	boardCollection := db.GetClient().
+		Database(fmt.Sprintf("company_%s", companyCode)).
+		Collection("boards")
+
+	// Get class collection for class name
+	classCollection := db.GetClient().
+		Database(fmt.Sprintf("company_%s", companyCode)).
+		Collection("classes")
+
+	// Fetch board name
+	var board models.Board
+	boardName := ""
+	err = boardCollection.FindOne(ctx, bson.M{
+		"entity_id":  student.BoardEntityID,
+		"is_deleted": false,
+	}).Decode(&board)
+	if err == nil {
+		boardName = board.BoardName
+	}
+
+	// Fetch class name
+	var class models.Class
+	className := ""
+	err = classCollection.FindOne(ctx, bson.M{
+		"entity_id":  student.ClassEntityID,
+		"is_deleted": false,
+	}).Decode(&class)
+	if err == nil {
+		className = class.ClassName
 	}
 
 	// Build receipt
@@ -177,11 +310,15 @@ func (s *receiptService) GetReceiptByRefNo(
 			Div:           student.Div,
 			BoardEntityID: student.BoardEntityID,
 			ClassEntityID: student.ClassEntityID,
+			BoardName:     boardName,
+			ClassName:     className,
 		},
 		PaymentHistory:  paymentHistory,
 		TotalPaid:       totalPaid,
 		TotalDue:        totalDue,
 		PendingPayments: pendingPayments,
+		AvailableBooks:  availableBooks,
+		AvailableExams:  availableExams,
 	}
 
 	return receipt, nil

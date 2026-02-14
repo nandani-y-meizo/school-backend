@@ -16,7 +16,8 @@ type Exam struct {
 	ClassEntityID string             `json:"class_entity_id,omitempty" bson:"class_entity_id,omitempty"`
 	ExamName      string             `json:"exam_name,omitempty" bson:"exam_name,omitempty"`
 	ExamAmount    float64            `json:"exam_amount,omitempty" bson:"exam_amount,omitempty"`
-	FeesPaid      bool               `json:"fees_paid" bson:"fees_paid"` // true = compulsory, false = optional
+	FeesPaid      bool               `json:"fees_paid" bson:"fees_paid"`                     // true = compulsory, false = optional
+	FeesType      string             `json:"fees_type,omitempty" bson:"fees_type,omitempty"` // "compulsory" or "optional"
 	IsDeleted     bool               `json:"is_deleted" bson:"is_deleted"`
 
 	CreatedAt time.Time `json:"created_at,omitempty" bson:"created_at,omitempty"`
@@ -29,6 +30,7 @@ type UpdateExam struct {
 	ExamName      *string  `json:"exam_name,omitempty" bson:"exam_name,omitempty"`
 	ExamAmount    *float64 `json:"exam_amount,omitempty" bson:"exam_amount,omitempty"`
 	FeesPaid      *bool    `json:"fees_paid,omitempty" bson:"fees_paid,omitempty"`
+	FeesType      *string  `json:"fees_type,omitempty" bson:"fees_type,omitempty"`
 	IsDeleted     *bool    `json:"is_deleted,omitempty" bson:"is_deleted,omitempty"`
 }
 
@@ -68,6 +70,7 @@ func (b *Exam) Bind(req *requests.CreateExamRequest) {
 	b.ExamName = req.ExamName
 	b.ExamAmount = req.ExamAmount
 	b.FeesPaid = req.FeesPaid
+	b.FeesType = req.FeesType
 }
 
 //
@@ -90,6 +93,9 @@ func (b *UpdateExam) Bind(req *requests.UpdateExamRequest) {
 	}
 	if req.FeesPaid != nil {
 		b.FeesPaid = req.FeesPaid
+	}
+	if req.FeesType != nil {
+		b.FeesType = req.FeesType
 	}
 	if req.IsDeleted != nil {
 		b.IsDeleted = req.IsDeleted

@@ -193,6 +193,9 @@ func (s *examService) Update(
 	if req.FeesPaid != nil {
 		updateFields["fees_paid"] = *req.FeesPaid
 	}
+	if req.FeesType != nil {
+		updateFields["fees_type"] = *req.FeesType
+	}
 	if req.IsDeleted != nil {
 		updateFields["is_deleted"] = *req.IsDeleted
 	}

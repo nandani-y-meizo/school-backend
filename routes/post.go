@@ -280,3 +280,61 @@ func GetReceiptByRefNo(c *gin.Context) {
 
 	c.JSON(http.StatusOK, receipt)
 }
+
+func ConfirmPayment(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Get company code from URL param
+	companyCode := c.Param("company_code")
+	if companyCode == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "company_code is required"})
+		return
+	}
+
+	// Bind and validate JSON payload
+	req := requests.NewConfirmPaymentRequest()
+	if err := req.Validate(c); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Call service to confirm payment
+	service := services.NewPaymentConfirmationService()
+	err := service.ConfirmPayment(ctx, companyCode, req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Payment confirmed successfully"})
+}
+
+func GetDailyReports(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Get company code from URL param
+	companyCode := c.Param("company_code")
+	if companyCode == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "company_code is required"})
+		return
+	}
+
+	// Bind and validate JSON payload
+	req := requests.NewDailyReportRequest()
+	if err := req.Validate(c); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Call service to get daily reports
+	service := services.NewDailyReportService()
+	reports, err := service.GetDailyReports(ctx, companyCode, req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, reports)
+}

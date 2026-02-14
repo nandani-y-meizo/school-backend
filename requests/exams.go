@@ -12,6 +12,7 @@ type CreateExamRequest struct {
 	ExamName      string  `json:"exam_name" binding:"required"`
 	ExamAmount    float64 `json:"exam_amount" binding:"required,gt=0"`
 	FeesPaid      bool    `json:"fees_paid"`
+	FeesType      string  `json:"fees_type,omitempty"`
 }
 
 type UpdateExamRequest struct {
@@ -20,14 +21,15 @@ type UpdateExamRequest struct {
 	ExamName      *string  `json:"exam_name,omitempty"`
 	ExamAmount    *float64 `json:"exam_amount,omitempty"`
 	FeesPaid      *bool    `json:"fees_paid,omitempty"`
+	FeesType      *string  `json:"fees_type,omitempty"`
 	IsDeleted     *bool    `json:"is_deleted,omitempty"`
 }
 
 type UpdateExamResponse struct {
-	ExamName  string  `json:"exam_name"`
-	ExamAmount    float64 `json:"exam_amount"`
-	FeesPaid  bool    `json:"fees_paid"`
-	IsDeleted bool    `json:"is_deleted"`
+	ExamName   string  `json:"exam_name"`
+	ExamAmount float64 `json:"exam_amount"`
+	FeesPaid   bool    `json:"fees_paid"`
+	IsDeleted  bool    `json:"is_deleted"`
 }
 
 //

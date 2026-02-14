@@ -13,6 +13,18 @@ type Receipt struct {
 	TotalPaid       float64               `json:"total_paid"`
 	TotalDue        float64               `json:"total_due"`
 	PendingPayments []PendingPayment      `json:"pending_payments"`
+	AvailableBooks  AvailableBooks        `json:"available_books"`
+	AvailableExams  AvailableExams        `json:"available_exams"`
+}
+
+type AvailableBooks struct {
+	Compulsory []Book `json:"compulsory"`
+	Optional   []Book `json:"optional"`
+}
+
+type AvailableExams struct {
+	Compulsory []Exam `json:"compulsory"`
+	Optional   []Exam `json:"optional"`
 }
 
 // StudentPaymentDetails contains student information
@@ -26,6 +38,8 @@ type StudentPaymentDetails struct {
 	Div           string             `json:"div"`
 	BoardEntityID string             `json:"board_entity_id"`
 	ClassEntityID string             `json:"class_entity_id"`
+	BoardName     string             `json:"board_name,omitempty"`
+	ClassName     string             `json:"class_name,omitempty"`
 }
 
 // PaymentHistoryItem contains individual payment details

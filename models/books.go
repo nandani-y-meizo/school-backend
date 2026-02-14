@@ -12,11 +12,13 @@ import (
 type Book struct {
 	ID            primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	EntityID      string             `json:"entity_id,omitempty" bson:"entity_id,omitempty"`
+	BookID        string             `json:"book_id,omitempty" bson:"book_id,omitempty"`
 	BoardEntityID string             `json:"board_entity_id,omitempty" bson:"board_entity_id,omitempty"`
 	ClassEntityID string             `json:"class_entity_id,omitempty" bson:"class_entity_id,omitempty"`
 	BookName      string             `json:"book_name,omitempty" bson:"book_name,omitempty"`
 	Amount        float64            `json:"amount,omitempty" bson:"amount,omitempty"`
-	FeesPaid      bool               `json:"fees_paid" bson:"fees_paid"` // true = compulsory, false = optional
+	FeesPaid      bool               `json:"fees_paid" bson:"fees_paid"`                     // true = compulsory, false = optional
+	FeesType      string             `json:"fees_type,omitempty" bson:"fees_type,omitempty"` // "compulsory" or "optional"
 	IsDeleted     bool               `json:"is_deleted" bson:"is_deleted"`
 
 	CreatedAt time.Time `json:"created_at,omitempty" bson:"created_at,omitempty"`
@@ -24,11 +26,13 @@ type Book struct {
 }
 
 type UpdateBook struct {
+	BookID        *string  `json:"book_id,omitempty" bson:"book_id,omitempty"`
 	BoardEntityID *string  `json:"board_entity_id,omitempty" bson:"board_entity_id,omitempty"`
 	ClassEntityID *string  `json:"class_entity_id,omitempty" bson:"class_entity_id,omitempty"`
 	BookName      *string  `json:"book_name,omitempty" bson:"book_name,omitempty"`
 	Amount        *float64 `json:"amount,omitempty" bson:"amount,omitempty"`
 	FeesPaid      *bool    `json:"fees_paid,omitempty" bson:"fees_paid,omitempty"`
+	FeesType      *string  `json:"fees_type,omitempty" bson:"fees_type,omitempty"`
 	IsDeleted     *bool    `json:"is_deleted,omitempty" bson:"is_deleted,omitempty"`
 }
 
@@ -63,11 +67,13 @@ func NewUpdateBook() *UpdateBook {
 //
 
 func (b *Book) Bind(req *requests.CreateBookRequest) {
+	b.BookID = req.BookID
 	b.BoardEntityID = req.BoardEntityID
 	b.ClassEntityID = req.ClassEntityID
 	b.BookName = req.BookName
 	b.Amount = req.Amount
 	b.FeesPaid = req.FeesPaid
+	b.FeesType = req.FeesType
 }
 
 //
@@ -76,6 +82,9 @@ func (b *Book) Bind(req *requests.CreateBookRequest) {
 
 func (b *UpdateBook) Bind(req *requests.UpdateBookRequest) {
 
+	if req.BookID != nil {
+		b.BookID = req.BookID
+	}
 	if req.BoardEntityID != nil {
 		b.BoardEntityID = req.BoardEntityID
 	}
@@ -90,6 +99,9 @@ func (b *UpdateBook) Bind(req *requests.UpdateBookRequest) {
 	}
 	if req.FeesPaid != nil {
 		b.FeesPaid = req.FeesPaid
+	}
+	if req.FeesType != nil {
+		b.FeesType = req.FeesType
 	}
 	if req.IsDeleted != nil {
 		b.IsDeleted = req.IsDeleted

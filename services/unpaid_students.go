@@ -68,79 +68,80 @@ func (s *unpaidStudentsService) GetUnpaidStudents(
 		return nil, err
 	}
 
-	// Get payment scanner collection
-	paymentCollection := db.GetClient().
-		Database(fmt.Sprintf("company_%s", companyCode)).
-		Collection("payment_scanners")
-
-	// Get exam collection
+	// Get collections
 	examCollection := db.GetClient().
 		Database(fmt.Sprintf("company_%s", companyCode)).
 		Collection("exams")
 
-	// Get book collection
 	bookCollection := db.GetClient().
 		Database(fmt.Sprintf("company_%s", companyCode)).
 		Collection("books")
+
+	paymentCollection := db.GetClient().
+		Database(fmt.Sprintf("company_%s", companyCode)).
+		Collection("payment_scanners")
+
+	// Get all exams
+	cursorExams, err := examCollection.Find(ctx, bson.M{"is_deleted": false})
+	if err != nil {
+		return nil, err
+	}
+	defer cursorExams.Close(ctx)
+	var allExams []models.Exam
+	if err := cursorExams.All(ctx, &allExams); err != nil {
+		return nil, err
+	}
+
+	// Map exams by class
+	classExams := make(map[string][]models.Exam)
+	for _, exam := range allExams {
+		classExams[exam.ClassEntityID] = append(classExams[exam.ClassEntityID], exam)
+	}
+
+	// Get all books
+	cursorBooks, err := bookCollection.Find(ctx, bson.M{"is_deleted": false})
+	if err != nil {
+		return nil, err
+	}
+	defer cursorBooks.Close(ctx)
+	var allBooks []models.Book
+	if err := cursorBooks.All(ctx, &allBooks); err != nil {
+		return nil, err
+	}
+
+	// Map books by class
+	classBooks := make(map[string][]models.Book)
+	for _, book := range allBooks {
+		classBooks[book.ClassEntityID] = append(classBooks[book.ClassEntityID], book)
+	}
+
+	// Get all payments to identify paid items
+	cursorPayments, err := paymentCollection.Find(ctx, bson.M{"is_deleted": false, "status": "paid"})
+	if err != nil {
+		return nil, err
+	}
+	defer cursorPayments.Close(ctx)
+	var allPayments []models.PaymentScanner
+	if err := cursorPayments.All(ctx, &allPayments); err != nil {
+		return nil, err
+	}
+
+	// Map paid items by student
+	studentPaidItems := make(map[string]map[string]bool)
+	for _, payment := range allPayments {
+		if studentPaidItems[payment.StudentEntityID] == nil {
+			studentPaidItems[payment.StudentEntityID] = make(map[string]bool)
+		}
+		studentPaidItems[payment.StudentEntityID][payment.ExamEntityID] = true
+	}
 
 	var unpaidStudents []models.UnpaidStudent
 
 	// Process each student
 	for _, student := range students {
-		// Get paid items for this student
-		paymentCursor, err := paymentCollection.Find(ctx, bson.M{
-			"student_entity_id": student.EntityID,
-			"is_deleted":        false,
-			"status":            "paid",
-		})
-		if err != nil {
-			continue
-		}
-
-		var paidPayments []models.PaymentScanner
-		if err := paymentCursor.All(ctx, &paidPayments); err != nil {
-			paymentCursor.Close(ctx)
-			continue
-		}
-		paymentCursor.Close(ctx)
-
-		// Create map of paid items
-		paidItems := make(map[string]bool)
-		for _, payment := range paidPayments {
-			paidItems[payment.ExamEntityID] = true
-		}
-
-		// Get all exams for this student's class
-		examFilter := bson.M{
-			"class_entity_id": student.ClassEntityID,
-			"is_deleted":      false,
-		}
-		examCursor, err := examCollection.Find(ctx, examFilter)
-		if err != nil {
-			continue
-		}
-		defer examCursor.Close(ctx)
-
-		var exams []models.Exam
-		if err := examCursor.All(ctx, &exams); err != nil {
-			continue
-		}
-
-		// Get all books for this student's class
-		bookFilter := bson.M{
-			"class_entity_id": student.ClassEntityID,
-			"is_deleted":      false,
-		}
-		bookCursor, err := bookCollection.Find(ctx, bookFilter)
-		if err != nil {
-			continue
-		}
-		defer bookCursor.Close(ctx)
-
-		var books []models.Book
-		if err := bookCursor.All(ctx, &books); err != nil {
-			continue
-		}
+		paidItems := studentPaidItems[student.EntityID]
+		exams := classExams[student.ClassEntityID]
+		books := classBooks[student.ClassEntityID]
 
 		// Build pending items
 		var pendingItems []models.PendingItem
@@ -148,7 +149,15 @@ func (s *unpaidStudentsService) GetUnpaidStudents(
 
 		// Add unpaid exams
 		for _, exam := range exams {
-			if !paidItems[exam.EntityID] {
+			if paidItems == nil || !paidItems[exam.EntityID] {
+				// Determine if compulsory
+				isCompulsory := false
+				if exam.FeesType != "" {
+					isCompulsory = exam.FeesType == "compulsory"
+				} else {
+					isCompulsory = exam.FeesPaid
+				}
+
 				itemType := "exam"
 				if req.ItemType != nil && *req.ItemType != "all" && *req.ItemType != itemType {
 					continue
@@ -160,7 +169,7 @@ func (s *unpaidStudentsService) GetUnpaidStudents(
 					ItemName:     exam.ExamName,
 					ItemAmount:   exam.ExamAmount,
 					DueAmount:    exam.ExamAmount,
-					IsCompulsory: exam.FeesPaid,
+					IsCompulsory: isCompulsory,
 				})
 				totalDue += exam.ExamAmount
 			}
@@ -168,8 +177,15 @@ func (s *unpaidStudentsService) GetUnpaidStudents(
 
 		// Add unpaid books
 		for _, book := range books {
-			bookKey := "book_" + book.EntityID
-			if !paidItems[bookKey] {
+			if paidItems == nil || !paidItems[book.EntityID] {
+				// Determine if compulsory
+				isCompulsory := false
+				if book.FeesType != "" {
+					isCompulsory = book.FeesType == "compulsory"
+				} else {
+					isCompulsory = book.FeesPaid
+				}
+
 				itemType := "book"
 				if req.ItemType != nil && *req.ItemType != "all" && *req.ItemType != itemType {
 					continue
@@ -181,7 +197,7 @@ func (s *unpaidStudentsService) GetUnpaidStudents(
 					ItemName:     book.BookName,
 					ItemAmount:   book.Amount,
 					DueAmount:    book.Amount,
-					IsCompulsory: book.FeesPaid,
+					IsCompulsory: isCompulsory,
 				})
 				totalDue += book.Amount
 			}

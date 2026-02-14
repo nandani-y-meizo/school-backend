@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"time"
 
+	"shared/infra/db/mdb"
+
 	"github.com/nandani-y-meizo/school-backend/models"
 	"github.com/nandani-y-meizo/school-backend/requests"
-	"shared/infra/db/mdb"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -177,6 +178,9 @@ func (s *bookService) Update(
 
 	updateFields := bson.M{}
 
+	if req.BookID != nil {
+		updateFields["book_id"] = *req.BookID
+	}
 	if req.BoardEntityID != nil {
 		updateFields["board_entity_id"] = *req.BoardEntityID
 	}
@@ -191,6 +195,9 @@ func (s *bookService) Update(
 	}
 	if req.FeesPaid != nil {
 		updateFields["fees_paid"] = *req.FeesPaid
+	}
+	if req.FeesType != nil {
+		updateFields["fees_type"] = *req.FeesType
 	}
 	if req.IsDeleted != nil {
 		updateFields["is_deleted"] = *req.IsDeleted
