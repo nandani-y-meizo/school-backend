@@ -7,21 +7,22 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"shared/middleware"
+
 	"github.com/nandani-y-meizo/school-backend/requests"
 	"github.com/nandani-y-meizo/school-backend/services"
-	// "shared/middleware"
 )
 
 func UpdateBoard(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// // Access check
-	// _, err := middleware.GetAccessClaims(c)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	// Access check
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Company code and Board ID
 	companyCode := c.Param("company_code")
@@ -53,12 +54,12 @@ func UpdateClass(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// // Access check
-	// _, err := middleware.GetAccessClaims(c)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	// Access check
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Company code and Class ID
 	companyCode := c.Param("company_code")
@@ -89,12 +90,12 @@ func UpdateBook(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// // Access check
-	// _, err := middleware.GetAccessClaims(c)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	// Access check
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Company code and Book ID
 	companyCode := c.Param("company_code")
@@ -126,12 +127,12 @@ func UpdateExam(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// // Access check
-	// _, err := middleware.GetAccessClaims(c)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	// Access check
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Company code and Exam ID
 	companyCode := c.Param("company_code")
@@ -162,12 +163,12 @@ func UpdateStudent(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// // Access check
-	// _, err := middleware.GetAccessClaims(c)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	// Access check
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Company code and Student ID
 	companyCode := c.Param("company_code")
@@ -199,12 +200,12 @@ func UpdateUser(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// // Access check
-	// _, err := middleware.GetAccessClaims(c)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	// Access check
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Company code and Student ID
 	companyCode := c.Param("company_code")
@@ -236,12 +237,12 @@ func UpdatePaymentScanner(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// // Access check
-	// _, err := middleware.GetAccessClaims(c)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	// Access check
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Company code and PaymentScanner ID
 	companyCode := c.Param("company_code")

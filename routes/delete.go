@@ -7,8 +7,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"shared/middleware"
+
 	"github.com/nandani-y-meizo/school-backend/services"
-	// "shared/middleware"
 )
 
 func DeleteBoard(c *gin.Context) {
@@ -16,12 +17,12 @@ func DeleteBoard(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// // Access check
-	// _, err := middleware.GetAccessClaims(c)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	// Access check
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Get company code and board ID
 	companyCode := c.Param("company_code")
@@ -34,7 +35,7 @@ func DeleteBoard(c *gin.Context) {
 
 	// Call service to delete
 	service := services.NewBoardService()
-	err := service.Delete(ctx, companyCode, id)
+	err = service.Delete(ctx, companyCode, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -47,12 +48,12 @@ func DeleteClass(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// // Access check
-	// _, err := middleware.GetAccessClaims(c)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	// Access check
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Get company code and class ID
 	companyCode := c.Param("company_code")
@@ -65,7 +66,7 @@ func DeleteClass(c *gin.Context) {
 
 	// Call service to delete
 	service := services.NewClassService()
-	err := service.Delete(ctx, companyCode, id)
+	err = service.Delete(ctx, companyCode, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -79,12 +80,12 @@ func DeleteBook(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// // Access check
-	// _, err := middleware.GetAccessClaims(c)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	// Access check
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Get company code and book ID
 	companyCode := c.Param("company_code")
@@ -97,7 +98,7 @@ func DeleteBook(c *gin.Context) {
 
 	// Call service to delete
 	service := services.NewBookService()
-	err := service.Delete(ctx, companyCode, id)
+	err = service.Delete(ctx, companyCode, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -110,12 +111,12 @@ func DeleteExam(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// // Access check
-	// _, err := middleware.GetAccessClaims(c)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	// Access check
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Get company code and exam ID
 	companyCode := c.Param("company_code")
@@ -128,7 +129,7 @@ func DeleteExam(c *gin.Context) {
 
 	// Call service to delete
 	service := services.NewExamService()
-	err := service.Delete(ctx, companyCode, id)
+	err = service.Delete(ctx, companyCode, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -140,12 +141,12 @@ func DeleteStudent(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// // Access check
-	// _, err := middleware.GetAccessClaims(c)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	// Access check
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Get company code and student ID
 	companyCode := c.Param("company_code")
@@ -158,7 +159,7 @@ func DeleteStudent(c *gin.Context) {
 
 	// Call service to delete
 	service := services.NewStudentService()
-	err := service.Delete(ctx, companyCode, id)
+	err = service.Delete(ctx, companyCode, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -171,12 +172,12 @@ func DeleteUser(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// // Access check
-	// _, err := middleware.GetAccessClaims(c)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	// Access check
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Get company code and student ID
 	companyCode := c.Param("company_code")
@@ -189,7 +190,7 @@ func DeleteUser(c *gin.Context) {
 
 	// Call service to delete
 	service := services.NewUserService()
-	err := service.Delete(ctx, companyCode, id)
+	err = service.Delete(ctx, companyCode, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -202,12 +203,12 @@ func DeletePaymentScanner(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// // Access check
-	// _, err := middleware.GetAccessClaims(c)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	// Access check
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Get company code and payment scanner ID
 	companyCode := c.Param("company_code")
@@ -220,7 +221,7 @@ func DeletePaymentScanner(c *gin.Context) {
 
 	// Call service to delete
 	service := services.NewPaymentScannerService()
-	err := service.Delete(ctx, companyCode, id)
+	err = service.Delete(ctx, companyCode, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

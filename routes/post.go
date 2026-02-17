@@ -7,21 +7,22 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"shared/middleware"
+
 	"github.com/nandani-y-meizo/school-backend/requests"
 	"github.com/nandani-y-meizo/school-backend/services"
-	// "shared/middleware"
 )
 
 func CreateBoard(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// // Check access claims
-	// _, err := middleware.GetAccessClaims(c)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	// Check access claims
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Get company code from URL param
 	companyCode := c.Param("company_code")
@@ -52,6 +53,13 @@ func CreateClass(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
+	// Access check
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
 	companyCode := c.Param("company_code")
 	if companyCode == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "company_code is required"})
@@ -76,12 +84,12 @@ func CreateBook(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// // Check access claims
-	// _, err := middleware.GetAccessClaims(c)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	// Check access claims
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Get company code from URL param
 	companyCode := c.Param("company_code")
@@ -112,6 +120,13 @@ func CreateExam(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
+	// Access check
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
 	// Get company code from URL param
 	companyCode := c.Param("company_code")
 	if companyCode == "" {
@@ -141,12 +156,12 @@ func CreateStudent(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// // Check access claims
-	// _, err := middleware.GetAccessClaims(c)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	// Check access claims
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Get company code from URL param
 	companyCode := c.Param("company_code")
@@ -177,12 +192,12 @@ func CreateUser(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// // Check access claims
-	// _, err := middleware.GetAccessClaims(c)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	// Check access claims
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Get company code from URL param
 	companyCode := c.Param("company_code")
@@ -213,12 +228,12 @@ func CreatePaymentScanner(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// // Check access claims
-	// _, err := middleware.GetAccessClaims(c)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	// Check access claims
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Get company code from URL param
 	companyCode := c.Param("company_code")
@@ -249,12 +264,12 @@ func GetReceiptByRefNo(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// // Check access claims
-	// _, err := middleware.GetAccessClaims(c)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	// Check access claims
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Get company code from URL param
 	companyCode := c.Param("company_code")
@@ -285,6 +300,13 @@ func ConfirmPayment(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
+	// Access check
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
 	// Get company code from URL param
 	companyCode := c.Param("company_code")
 	if companyCode == "" {
@@ -301,7 +323,7 @@ func ConfirmPayment(c *gin.Context) {
 
 	// Call service to confirm payment
 	service := services.NewPaymentConfirmationService()
-	err := service.ConfirmPayment(ctx, companyCode, req)
+	err = service.ConfirmPayment(ctx, companyCode, req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -313,6 +335,13 @@ func ConfirmPayment(c *gin.Context) {
 func GetDailyReports(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
+
+	// Access check
+	_, err := middleware.GetAccessClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Get company code from URL param
 	companyCode := c.Param("company_code")

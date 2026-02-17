@@ -7,7 +7,11 @@ require (
 	shared v0.0.0-00010101000000-000000000000
 )
 
-require github.com/joho/godotenv v1.5.1 // indirect
+require (
+	github.com/MicahParks/keyfunc v1.9.0 // indirect
+	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
+)
 
 require (
 	github.com/bytedance/gopkg v0.1.3 // indirect

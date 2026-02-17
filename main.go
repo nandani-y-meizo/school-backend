@@ -8,6 +8,8 @@ import (
 
 	// "fitpro/middleware"
 	"shared/infra/db/mdb"
+	"shared/middleware"
+	"shared/pkgs/jwtmanager"
 
 	"github.com/nandani-y-meizo/school-backend/routes"
 
@@ -23,6 +25,12 @@ func main() {
 	}
 	fmt.Println("MongoDB connected")
 
+	// Initialize Vault JWT
+	if err := jwtmanager.InitVaultJWT(); err != nil {
+		log.Fatalf("Failed to initialize Vault JWT: %v", err)
+	}
+	fmt.Println("Vault JWT initialized")
+
 	// Create main app router
 	app := gin.Default()
 
@@ -37,10 +45,11 @@ func main() {
 	}))
 
 	// Logging middleware
-	// app.Use(middleware.RequestLogger())
+	app.Use(middleware.RequestLogger())
 
 	// API group
 	api := app.Group("/api/v1")
+	api.Use(middleware.AuthcMiddleware())
 
 	// Load routes
 	routes.Routes(api)
