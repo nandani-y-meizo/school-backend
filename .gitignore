@@ -1,7 +1,9 @@
 # Environment files
+.env*
 .env.development
 .env.production
 .env.test
+
 
 # IDE files
 .vscode/
