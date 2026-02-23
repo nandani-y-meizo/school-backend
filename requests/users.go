@@ -7,9 +7,9 @@ import (
 )
 
 type CreateUserRequest struct {
-	Name      string `json:"name" binding:"required"`
-	Email     string `json:"email" binding:"required"`
-	Password  string `json:"password" binding:"required"`
+	Name     string `json:"name" binding:"required"`
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
 
 type UpdateUserRequest struct {
@@ -50,4 +50,3 @@ func (r *UpdateUserRequest) Validate(c *gin.Context) error {
 	// Add any custom validation logic here if needed
 	return nil
 }
-

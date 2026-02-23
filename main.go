@@ -51,8 +51,12 @@ func main() {
 	api := app.Group("/api/v1")
 	api.Use(middleware.AuthcMiddleware())
 
+	// Public API group (no authentication required)
+	publicApi := app.Group("/api/v1")
+
 	// Load routes
 	routes.Routes(api)
+	routes.PublicRoutes(publicApi)
 
 	// Start server
 	server := &http.Server{

@@ -115,3 +115,12 @@ func Routes(api *gin.RouterGroup) {
 		dashboard.GET("/stats", GetDashboardStats)
 	}
 }
+
+// PublicRoutes sets up public API routes that don't require authentication
+func PublicRoutes(api *gin.RouterGroup) {
+	// Role verification route (public endpoint)
+	api.POST("/verify-role", VerifyUserRole)
+
+	// Regular user login route (public endpoint)
+	api.POST("/login-regular", LoginRegularUser)
+}
